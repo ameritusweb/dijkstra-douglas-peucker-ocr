@@ -3,6 +3,7 @@ using Emgu.CV;
 using Newtonsoft.Json;
 using System.Drawing;
 using System.Text.Json.Serialization;
+using Emgu.CV.CvEnum;
 
 namespace ImageProcess
 {
@@ -10,6 +11,11 @@ namespace ImageProcess
     {
         static void Main(string[] args)
         {
+            Node[,] nodes = ImageSerializer.DeserializeImageWithAntiAlias("E:\\images\\inputs\\Ocr\\Lato_upper_A.png");
+            OcrTools tools = new OcrTools(nodes);
+            tools.CalculateFeatures();
+
+
             var charFiles = Directory.GetFiles("E:\\images\\inputs\\Characters", "char*.png");
 
             //var sFiles = Directory.GetFiles("E:\\images\\saved_images", "*.png");

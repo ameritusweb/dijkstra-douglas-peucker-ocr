@@ -75,11 +75,6 @@ namespace ImageProcess
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count > targetSize)
-            {
-
-            }
-
             int paddingNeeded = targetSize - list.Count;
             for (int i = 0; i < paddingNeeded; i++)
             {

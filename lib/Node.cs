@@ -12,6 +12,7 @@ namespace ImageProcess
         public double NegativeSpaceValue;
 
         public bool IsForeground { get; set; }
+        public double Intensity { get; set; }
         public Point Point { get; set; }
         public double Distance { get; set; }
         public Node Previous { get; set; }
@@ -27,6 +28,10 @@ namespace ImageProcess
         {
             Point = new Point(x, y);
             IsForeground = isForeground;
+            if (!isForeground)
+            {
+                Intensity = 255;
+            }
         }
 
         public Node Clone()
