@@ -15,6 +15,12 @@ namespace ImageProcess
             visited = new bool[image.Height, image.Width];
         }
 
+        public void Reset()
+        {
+            visited = new bool[image.Height, image.Width];
+            sections = new List<List<Node>>();
+        }
+
         public IReadOnlyList<SectionMetrics> CalculateMetrics(double intensity)
         {
             var metrics = new List<SectionMetrics>();
@@ -29,10 +35,17 @@ namespace ImageProcess
 
                 // Calculate Aspect Ratio
                 var centroid = CalculateCentroid(section);
-                var (maxDist, minDist) = FindMaxMinDistances(section, centroid);
-                sectionMetrics.AspectRatio = maxDist / minDist;
+                var (maxDist, minDist) = FindMaxMinDistances(section, centroid.node);
+                sectionMetrics.AspectRatio = maxDist / Math.Max(minDist, 1);
+                sectionMetrics.CentroidPositionX = centroid.X;
+                sectionMetrics.CentroidPositionY = centroid.Y;
+                sectionMetrics.RelativeMass = area * 1d / (image.Width * image.Height) * 100d;
+                sectionMetrics.RelativeMax = maxDist * 1d / Math.Sqrt(Math.Pow(image.Width, 2) + Math.Pow(image.Height, 2)) * 100d;
 
-                metrics.Add(sectionMetrics);
+                if (sectionMetrics.RelativeMass > 0.5d)
+                {
+                    metrics.Add(sectionMetrics);
+                }
             }
             return metrics.AsReadOnly();
         }
@@ -65,7 +78,7 @@ namespace ImageProcess
             return false;
         }
 
-        private Node CalculateCentroid(List<Node> section)
+        private (Node node, double X, double Y)  CalculateCentroid(List<Node> section)
         {
             double xSum = 0, ySum = 0;
             foreach (var node in section)
@@ -73,7 +86,18 @@ namespace ImageProcess
                 xSum += node.X;
                 ySum += node.Y;
             }
-            return new Node((int)(ySum / section.Count), (int)(xSum / section.Count), false);
+            int centerX = (int)(xSum / section.Count);
+            int centerY = (int)(ySum / section.Count);
+
+            return (new Node((int)(ySum / section.Count), (int)(xSum / section.Count), false), MapCoordinate(centerX, image.Width),
+                            MapCoordinate(centerY, image.Height));
+        }
+
+        private double MapCoordinate(int coordinate, int maxDimension)
+        {
+            // Maps the coordinate to the range of -10 to 10
+            double relativePosition = 2.0 * (coordinate - (maxDimension / 2.0)) / maxDimension;
+            return relativePosition * 10d;
         }
 
         private (double maxDist, double minDist) FindMaxMinDistances(List<Node> section, Node centroid)

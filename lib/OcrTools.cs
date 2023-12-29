@@ -27,6 +27,10 @@ namespace ImageProcess
             IntersectionAnalyzer intersectionAnalyzer = new IntersectionAnalyzer();
             var (angles, percentages) = intersectionAnalyzer.Analyze(this.nodes, centerOfMassOffset.rawTotal);
             var negativeSpaceImage = FindNegativeSpace();
+            ImageAnalyzer imageAnalyzer = new ImageAnalyzer(negativeSpaceImage);
+            var metrics = imageAnalyzer.CalculateMetrics(150d);
+            imageAnalyzer.Reset();
+            var borderMetrics = imageAnalyzer.CalculateMetrics(220d);
             GridProcessor gridProcessor = new GridProcessor(negativeSpaceImage);
             var paths = gridProcessor.ProcessGrid();
             var longest = FindLongestLineSegmentSet(paths);
