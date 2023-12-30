@@ -10,6 +10,5 @@ namespace ImageProcess.Model
     {
         public double Width { get; set; }
         public double Height { get; set; }
-        // You can add more properties if needed
     }
 }
