@@ -12,16 +12,16 @@ namespace ImageProcess
     {
         static void Main(string[] args)
         {
-            var afiles = Directory.GetFiles("E:\\images\\saved_images_G", "*.png");
-            foreach (var afile in afiles)
-            {
-                ImageAugmenter imageAugmenter = new ImageAugmenter();
-                for (int i = -10; i <= 10; i++)
-                {
-                    if (i != 0)
-                        imageAugmenter.ApplyRandomRotationWithSelectiveReversal(afile, i);
-                }
-            }
+            //var afiles = Directory.GetFiles("E:\\images\\saved_images_G", "*.png");
+            //foreach (var afile in afiles)
+            //{
+            //    ImageAugmenter imageAugmenter = new ImageAugmenter();
+            //    for (int i = -10; i <= 10; i++)
+            //    {
+            //        if (i != 0)
+            //            imageAugmenter.ApplyRandomRotationWithSelectiveReversal(afile, i);
+            //    }
+            //}
 
             var cFiles = Directory.GetFiles("E:\\images\\inputs\\Ocr", "char*.png");
             FeatureScaler scaler = new FeatureScaler();
@@ -30,9 +30,18 @@ namespace ImageProcess
                 Node[,] nodes = ImageSerializer.DeserializeImageWithAntiAlias(cFile);
                 OcrTools tools = new OcrTools(nodes);
                 OcrFeatures features = tools.CalculateFeatures();
-                scaler.UpdateMinMax(features);
+                var vector = scaler.ScaleFeatures(features);
+                List<List<double>> list = new List<List<double>>();
+                for (int i = 0; i < 17; ++i)
+                {
+                    var subvect = vector.Skip(i * 223).Take(223).ToList();
+                    list.Add(subvect);
+                }
+                var json = JsonConvert.SerializeObject(list, Formatting.Indented);
+                File.WriteAllText(cFile.Replace(".png", ".json"), json);
+                //scaler.UpdateMinMax(features);
             }
-            scaler.ExportMinMaxValues("E:\\images\\inputs\\Ocr\\MinMaxValues.json");
+            //scaler.ExportMinMaxValues("E:\\images\\inputs\\Ocr\\MinMaxValues.json");
 
             var charFiles = Directory.GetFiles("E:\\images\\inputs\\Characters", "char*.png");
 

@@ -28,5 +28,8 @@ namespace ImageProcess.Model
 
         // Longest shortest path inside positive space
         public ShortestPath LongestShortestPath { get; set; }
+        public double MaxAxis { get; internal set; }
+        public double MinAxis { get; internal set; }
+        public double AxisAngle { get; internal set; }
     }
 }

@@ -24,6 +24,8 @@ namespace ImageProcess
         {
             var boundingBox = CalculateBoundingBoxAndAspectRatio();
             var centerOfMassOffset = CalculateCenterOfMassOffset();
+            var axisAnalyzer = new AxisAnalyzer();
+            var axisRes = axisAnalyzer.Calculate(nodes);
             IntersectionAnalyzer intersectionAnalyzer = new IntersectionAnalyzer();
             var (angles, percentages) = intersectionAnalyzer.Analyze(this.nodes, centerOfMassOffset.rawTotal);
             var negativeSpaceImage = FindNegativeSpace();
@@ -39,6 +41,7 @@ namespace ImageProcess
             LineSegmentProcessor lineSegmentProcessor = new LineSegmentProcessor();
             var totalLength = lineSegmentProcessor.CalculateTotalLength(longest);
             var segmentAngles = lineSegmentProcessor.CalculateAngles(longest);
+            var aspectRatio = lineSegmentProcessor.CalculateAspectRatio(longest);
             negativeSpaceImage.Save("E:\\images\\inputs\\ocr\\negativeSpaceImage.png");
 
             OcrFeatures features = new OcrFeatures();
@@ -51,6 +54,9 @@ namespace ImageProcess
             features.CentroidX = centerOfMassOffset.offsetX;
             features.CentroidY = centerOfMassOffset.offsetY;
             features.MassToTotalArea = centerOfMassOffset.massPercent;
+            features.MaxAxis = axisRes.maxAxis;
+            features.MinAxis = axisRes.minAxis;
+            features.AxisAngle = axisRes.angle;
 
             features.IntersectionArrays = new List<List<int>>();
             foreach (var angle in angles)
@@ -72,7 +78,8 @@ namespace ImageProcess
                  TotalNumberOfLineSegments = longest.Count,
                  TotalLengthToDiagonalLengthRatio = totalLength / Math.Sqrt(Math.Pow(features.BoundingBox.Width, 2) + Math.Pow(features.BoundingBox.Height, 2)),
                  StartPosition = GetCornerPointPosition(cornerPoints, longest[0]),
-                 EndPosition = GetCornerPointPosition(cornerPoints, longest[longest.Count - 1])
+                 EndPosition = GetCornerPointPosition(cornerPoints, longest[longest.Count - 1]),
+                 AspectRatio = aspectRatio
             };
             features.NumberOfNegativeSpaceBorders = borderMetrics.Count;
             features.NumberOfNegativeSpaces = metrics.Count;

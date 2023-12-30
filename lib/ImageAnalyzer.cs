@@ -1,4 +1,5 @@
 ﻿using Emgu.CV;
+using Emgu.CV.ImgHash;
 using Emgu.CV.Structure;
 
 namespace ImageProcess
@@ -59,10 +60,38 @@ namespace ImageProcess
                     sectionMetrics.MinorAxisLength = minorAxisLength;
                     sectionMetrics.AxisAngle = angle;
 
+                    sectionMetrics.IsEnclosed = !HasNeighbor(section, 220d);
+
                     metrics.Add(sectionMetrics);
                 }
             }
             return metrics.AsReadOnly();
+        }
+
+        public bool HasNeighbor(List<Node> nodes, double intensity)
+        {
+            bool hasNeighbor = false;
+            foreach (var node in nodes)
+            {
+                if (image[node.Y + 1, node.X].Intensity == intensity)
+                {
+                    hasNeighbor = true;
+                    break;
+                } else if (image[node.Y - 1, node.X].Intensity == intensity)
+                {
+                    hasNeighbor = true;
+                    break;
+                } else if (image[node.Y, node.X + 1].Intensity == intensity)
+                {
+                    hasNeighbor = true;
+                    break;
+                } else if (image[node.Y, node.X - 1].Intensity == intensity)
+                {
+                    hasNeighbor = true;
+                    break;
+                }
+            }
+            return hasNeighbor;
         }
 
         private int CalculatePerimeter(List<Node> section)

@@ -13,5 +13,6 @@ namespace ImageProcess.Model
         public List<double> AngleChanges { get; set; }
         public string StartPosition { get; set; } // NW, SW, NE, SE
         public string EndPosition { get; set; } // NW, SW, NE, SE
+        public double AspectRatio { get; internal set; }
     }
 }
