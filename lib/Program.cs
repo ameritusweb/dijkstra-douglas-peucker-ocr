@@ -12,11 +12,15 @@ namespace ImageProcess
     {
         static void Main(string[] args)
         {
-            var afiles = Directory.GetFiles("E:\\images\\saved_images_A", "*.png");
+            var afiles = Directory.GetFiles("E:\\images\\saved_images_G", "*.png");
             foreach (var afile in afiles)
             {
                 ImageAugmenter imageAugmenter = new ImageAugmenter();
-                imageAugmenter.ApplyRandomRotationWithSelectiveReversal(afile, "E:\\images\\saved_images_A\\output.png");
+                for (int i = -10; i <= 10; i++)
+                {
+                    if (i != 0)
+                        imageAugmenter.ApplyRandomRotationWithSelectiveReversal(afile, i);
+                }
             }
 
             var cFiles = Directory.GetFiles("E:\\images\\inputs\\Ocr", "char*.png");
