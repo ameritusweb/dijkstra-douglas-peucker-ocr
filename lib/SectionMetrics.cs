@@ -15,5 +15,8 @@ namespace ImageProcess
         public double CentroidPositionY { get; set; }
         public double RelativeMass { get; set; }
         public double RelativeMax { get; set; }
+        public double MajorAxisLength { get; internal set; }
+        public double MinorAxisLength { get; internal set; }
+        public double AxisAngle { get; internal set; }
     }
 }

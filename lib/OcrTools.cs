@@ -69,6 +69,10 @@ namespace ImageProcess
                  TotalNumberOfLineSegments = longest.Count,
                  TotalLengthToDiagonalLengthRatio = totalLength / Math.Sqrt(Math.Pow(features.BoundingBox.Width, 2) + Math.Pow(features.BoundingBox.Height, 2))
             };
+            features.NumberOfNegativeSpaceBorders = borderMetrics.Count;
+            features.NumberOfNegativeSpaces = metrics.Count;
+            features.NegativeSpaces = metrics.ToList();
+            features.NegativeSpaceBorders = borderMetrics.ToList();
 
             return features;
         }

@@ -20,11 +20,11 @@ namespace ImageProcess.Model
 
         // Negative spaces
         public int NumberOfNegativeSpaces { get; set; }
-        public List<NegativeSpace> NegativeSpaces { get; set; }
+        public List<SectionMetrics> NegativeSpaces { get; set; }
 
         // Negative space borders
         public int NumberOfNegativeSpaceBorders { get; set; }
-        public List<NegativeSpaceBorder> NegativeSpaceBorders { get; set; }
+        public List<SectionMetrics> NegativeSpaceBorders { get; set; }
 
         // Longest shortest path inside positive space
         public ShortestPath LongestShortestPath { get; set; }

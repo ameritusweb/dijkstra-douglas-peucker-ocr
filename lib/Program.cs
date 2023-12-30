@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.Drawing;
 using System.Text.Json.Serialization;
 using Emgu.CV.CvEnum;
+using ImageProcess.Model;
 
 namespace ImageProcess
 {
@@ -13,7 +14,7 @@ namespace ImageProcess
         {
             Node[,] nodes = ImageSerializer.DeserializeImageWithAntiAlias("E:\\images\\inputs\\Ocr\\Lato_upper_A.png");
             OcrTools tools = new OcrTools(nodes);
-            tools.CalculateFeatures();
+            OcrFeatures features = tools.CalculateFeatures();
 
 
             var charFiles = Directory.GetFiles("E:\\images\\inputs\\Characters", "char*.png");
