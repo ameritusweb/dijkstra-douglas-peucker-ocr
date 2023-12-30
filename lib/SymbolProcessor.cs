@@ -24,7 +24,8 @@
             Image<Gray, Byte> image = ResizeWithAntiAliasing(img.Mat).ToImage<Gray, Byte>();
 
             GridProcessor processor = new GridProcessor(image);
-            var listOfLists = processor.ProcessGrid();
+            var cornerPoints = processor.FindCornerPoints();
+            var listOfLists = processor.ProcessGrid(cornerPoints);
 
             var newImage = ProcessImage(image);
 

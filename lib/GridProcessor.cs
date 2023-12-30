@@ -24,9 +24,9 @@ namespace ImageProcess
             }
         }
 
-        public IReadOnlyList<List<Node>> ProcessGrid()
+        public IReadOnlyList<List<Node>> ProcessGrid((Node topLeft, Node topRight, Node bottomLeft, Node bottomRight) cornerPoints)
         {
-            var pointPairs = GenerateCornerPointPairs();
+            var pointPairs = GenerateCornerPointPairs(cornerPoints);
             DouglasPeuckerAlgorithm douglasPeuckerAlgorithm = new DouglasPeuckerAlgorithm();
 
             ConcurrentBag<List<Node>> lineSegmentBag = new ConcurrentBag<List<Node>>();
@@ -119,19 +119,17 @@ namespace ImageProcess
             return (topLeft, topRight, bottomLeft, bottomRight);
         }
 
-        public List<(Node, Node)> GenerateCornerPointPairs()
+        public List<(Node, Node)> GenerateCornerPointPairs((Node topLeft, Node topRight, Node bottomLeft, Node bottomRight) cornerPoints)
         {
-            var (topLeft, topRight, bottomLeft, bottomRight) = FindCornerPoints();
-
             var pairs = new List<(Node, Node)>
-        {
-            (topLeft, topRight),
-            (topLeft, bottomLeft),
-            (topLeft, bottomRight),
-            (topRight, bottomLeft),
-            (topRight, bottomRight),
-            (bottomLeft, bottomRight)
-        };
+            {
+                (cornerPoints.topLeft, cornerPoints.topRight),
+                (cornerPoints.topLeft, cornerPoints.bottomLeft),
+                (cornerPoints.topLeft, cornerPoints.bottomRight),
+                (cornerPoints.topRight, cornerPoints.bottomLeft),
+                (cornerPoints.topRight, cornerPoints.bottomRight),
+                (cornerPoints.bottomLeft, cornerPoints.bottomRight)
+            };
 
             // Filter out any pairs where either node is null (if a corner wasn't found)
             return pairs.Where(pair => pair.Item1 != null && pair.Item2 != null).ToList();

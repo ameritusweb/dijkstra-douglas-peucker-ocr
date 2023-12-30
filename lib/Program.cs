@@ -12,10 +12,13 @@ namespace ImageProcess
     {
         static void Main(string[] args)
         {
-            Node[,] nodes = ImageSerializer.DeserializeImageWithAntiAlias("E:\\images\\inputs\\Ocr\\Lato_upper_A.png");
-            OcrTools tools = new OcrTools(nodes);
-            OcrFeatures features = tools.CalculateFeatures();
-
+            var cFiles = Directory.GetFiles("E:\\images\\inputs\\Ocr", "char*.png");
+            foreach (var cFile in cFiles)
+            {
+                Node[,] nodes = ImageSerializer.DeserializeImageWithAntiAlias(cFile);
+                OcrTools tools = new OcrTools(nodes);
+                OcrFeatures features = tools.CalculateFeatures();
+            }
 
             var charFiles = Directory.GetFiles("E:\\images\\inputs\\Characters", "char*.png");
 

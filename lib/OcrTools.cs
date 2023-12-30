@@ -32,12 +32,14 @@ namespace ImageProcess
             imageAnalyzer.Reset();
             var borderMetrics = imageAnalyzer.CalculateMetrics(220d);
             GridProcessor gridProcessor = new GridProcessor(negativeSpaceImage);
-            var paths = gridProcessor.ProcessGrid();
+            var cornerPoints = gridProcessor.FindCornerPoints(); // topLeft, topRight, bottomLeft, bottomRight
+            var paths = gridProcessor.ProcessGrid(cornerPoints);
             var longest = FindLongestLineSegmentSet(paths);
             DrawLineSegments(longest, negativeSpaceImage);
             LineSegmentProcessor lineSegmentProcessor = new LineSegmentProcessor();
             var totalLength = lineSegmentProcessor.CalculateTotalLength(longest);
             var segmentAngles = lineSegmentProcessor.CalculateAngles(longest);
+            negativeSpaceImage.Save("E:\\images\\inputs\\ocr\\negativeSpaceImage.png");
 
             OcrFeatures features = new OcrFeatures();
             features.BoundingBox = new BoundingBox()
@@ -63,11 +65,14 @@ namespace ImageProcess
                 PadListToSize(p, 15, -1);
                 features.IntersectionArrays.Add(p);
             }
+            PadListToSize(segmentAngles, 15, -1);
             features.LongestShortestPath = new ShortestPath()
             {
-                 AngleChanges = segmentAngles,
+                 AngleChanges = segmentAngles.Take(15).ToList(),
                  TotalNumberOfLineSegments = longest.Count,
-                 TotalLengthToDiagonalLengthRatio = totalLength / Math.Sqrt(Math.Pow(features.BoundingBox.Width, 2) + Math.Pow(features.BoundingBox.Height, 2))
+                 TotalLengthToDiagonalLengthRatio = totalLength / Math.Sqrt(Math.Pow(features.BoundingBox.Width, 2) + Math.Pow(features.BoundingBox.Height, 2)),
+                 StartPosition = GetCornerPointPosition(cornerPoints, longest[0]),
+                 EndPosition = GetCornerPointPosition(cornerPoints, longest[longest.Count - 1])
             };
             features.NumberOfNegativeSpaceBorders = borderMetrics.Count;
             features.NumberOfNegativeSpaces = metrics.Count;
@@ -75,6 +80,26 @@ namespace ImageProcess
             features.NegativeSpaceBorders = borderMetrics.ToList();
 
             return features;
+        }
+
+        private string GetCornerPointPosition((Node topLeft, Node topRight, Node bottomLeft, Node bottomRight) cornerPoints, Node node)
+        {
+            if (node.Point.X == cornerPoints.topLeft.Point.X && node.Point.Y == cornerPoints.topLeft.Point.Y)
+            {
+                return "NW";
+            } else if (node.Point.X == cornerPoints.topRight.Point.X && node.Point.Y == cornerPoints.topRight.Point.Y)
+            {
+                return "NE";
+            } else if (node.Point.X == cornerPoints.bottomLeft.Point.X && node.Point.Y == cornerPoints.bottomLeft.Point.Y)
+            {
+                return "SW";
+            } else if (node.Point.X == cornerPoints.bottomRight.Point.X && node.Point.Y == cornerPoints.bottomRight.Point.Y)
+            {
+                return "SE";
+            } else
+            {
+                return "Unknown";
+            }
         }
 
         public List<Node> FindLongestLineSegmentSet(IReadOnlyList<List<Node>> lineSegments)
@@ -380,6 +405,18 @@ namespace ImageProcess
         }
 
         private void PadListToSize(List<int> list, int targetSize, int padValue)
+        {
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+
+            int paddingNeeded = targetSize - list.Count;
+            for (int i = 0; i < paddingNeeded; i++)
+            {
+                list.Add(padValue);
+            }
+        }
+
+        private void PadListToSize(List<double> list, int targetSize, int padValue)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
