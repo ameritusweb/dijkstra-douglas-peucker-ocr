@@ -12,13 +12,23 @@ namespace ImageProcess
     {
         static void Main(string[] args)
         {
+            var afiles = Directory.GetFiles("E:\\images\\saved_images_A", "*.png");
+            foreach (var afile in afiles)
+            {
+                ImageAugmenter imageAugmenter = new ImageAugmenter();
+                imageAugmenter.ApplyRandomRotationWithSelectiveReversal(afile, "E:\\images\\saved_images_A\\output.png");
+            }
+
             var cFiles = Directory.GetFiles("E:\\images\\inputs\\Ocr", "char*.png");
+            FeatureScaler scaler = new FeatureScaler();
             foreach (var cFile in cFiles)
             {
                 Node[,] nodes = ImageSerializer.DeserializeImageWithAntiAlias(cFile);
                 OcrTools tools = new OcrTools(nodes);
                 OcrFeatures features = tools.CalculateFeatures();
+                scaler.UpdateMinMax(features);
             }
+            scaler.ExportMinMaxValues("E:\\images\\inputs\\Ocr\\MinMaxValues.json");
 
             var charFiles = Directory.GetFiles("E:\\images\\inputs\\Characters", "char*.png");
 

@@ -1,4 +1,5 @@
 ﻿using ImageProcess.Model;
+using Newtonsoft.Json;
 
 namespace ImageProcess
 {
@@ -20,6 +21,19 @@ namespace ImageProcess
         {
             minValues = new Dictionary<string, double>();
             maxValues = new Dictionary<string, double>();
+        }
+
+        public void ExportMinMaxValues(string filePath)
+        {
+            var minMaxValues = new
+            {
+                MinValues = minValues,
+                MaxValues = maxValues
+            };
+
+            string json = JsonConvert.SerializeObject(minMaxValues, Formatting.Indented);
+
+            File.WriteAllText(filePath, json);
         }
 
         public void UpdateMinMax(OcrFeatures features)
@@ -56,6 +70,7 @@ namespace ImageProcess
                     UpdateMinMax("MinorAxisLength", sectionMetrics.MinorAxisLength);
                     UpdateMinMax("AxisAngle", sectionMetrics.AxisAngle);
                 }
+                UpdateMinMax("NegativeSpacesCount", features.NegativeSpaces.Count);
             }
 
             // Update min and max values for NegativeSpaceBorders (if needed)
@@ -72,6 +87,7 @@ namespace ImageProcess
                     UpdateMinMax("MinorAxisLength", sectionMetrics.MinorAxisLength);
                     UpdateMinMax("AxisAngle", sectionMetrics.AxisAngle);
                 }
+                UpdateMinMax("NegativeSpaceBordersCount", features.NegativeSpaceBorders.Count);
             }
 
             // Update min and max values for LongestShortestPath (if needed)
@@ -117,7 +133,6 @@ namespace ImageProcess
                 ScaleFeature("CentroidY", features.CentroidY),
                 ScaleFeature("MassToTotalArea", features.MassToTotalArea)
             };
-            // ... add other simple features ...
 
             // Scale complex features like IntersectionArrays
             if (features.IntersectionArrays != null)
@@ -132,7 +147,8 @@ namespace ImageProcess
             scaledFeatureList.Add(ScaleFeature("NumberOfNegativeSpaces", features.NumberOfNegativeSpaces));
             if (features.NegativeSpaces != null)
             {
-                foreach (var sectionMetrics in features.NegativeSpaces)
+                int maxNegativeSpacesCount = (int)maxValues["NegativeSpacesCount"];
+                foreach (var sectionMetrics in features.NegativeSpaces.Take(maxNegativeSpacesCount))
                 {
                     scaledFeatureList.Add(ScaleFeature("Circularity", sectionMetrics.Circularity));
                     scaledFeatureList.Add(ScaleFeature("AspectRatio", sectionMetrics.AspectRatio));
@@ -144,12 +160,19 @@ namespace ImageProcess
                     scaledFeatureList.Add(ScaleFeature("MinorAxisLength", sectionMetrics.MinorAxisLength));
                     scaledFeatureList.Add(ScaleFeature("AxisAngle", sectionMetrics.AxisAngle));
                 }
+
+                for (int i = 0; i < maxNegativeSpacesCount - features.NegativeSpaces.Count; i++)
+                {
+                    for (int j = 0; j < 9; ++j)
+                        scaledFeatureList.Add(0.0);
+                }
             }
 
             scaledFeatureList.Add(ScaleFeature("NumberOfNegativeSpaceBorders", features.NumberOfNegativeSpaceBorders));
             if (features.NegativeSpaceBorders != null)
             {
-                foreach (var sectionMetrics in features.NegativeSpaceBorders)
+                int maxNegativeSpaceBordersCount = (int)maxValues["NegativeSpaceBordersCount"];
+                foreach (var sectionMetrics in features.NegativeSpaceBorders.Take(maxNegativeSpaceBordersCount))
                 {
                     scaledFeatureList.Add(ScaleFeature("Circularity", sectionMetrics.Circularity));
                     scaledFeatureList.Add(ScaleFeature("AspectRatio", sectionMetrics.AspectRatio));
@@ -160,6 +183,12 @@ namespace ImageProcess
                     scaledFeatureList.Add(ScaleFeature("MajorAxisLength", sectionMetrics.MajorAxisLength));
                     scaledFeatureList.Add(ScaleFeature("MinorAxisLength", sectionMetrics.MinorAxisLength));
                     scaledFeatureList.Add(ScaleFeature("AxisAngle", sectionMetrics.AxisAngle));
+                }
+
+                for (int i = 0; i < maxNegativeSpaceBordersCount - features.NegativeSpaceBorders.Count; i++)
+                {
+                    for (int j = 0; j < 9; ++j)
+                        scaledFeatureList.Add(0.0);
                 }
             }
 
