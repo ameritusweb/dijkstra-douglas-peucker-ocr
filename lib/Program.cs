@@ -12,7 +12,7 @@ namespace ImageProcess
     {
         static void Main(string[] args)
         {
-            //var afiles = Directory.GetFiles("E:\\images\\saved_images_G", "*.png");
+            //var afiles = Directory.GetFiles("E:\\images\\saved_images_D", "*.png");
             //foreach (var afile in afiles)
             //{
             //    ImageAugmenter imageAugmenter = new ImageAugmenter();
@@ -28,6 +28,9 @@ namespace ImageProcess
             foreach (var cFile in cFiles)
             {
                 Node[,] nodes = ImageSerializer.DeserializeImageWithAntiAlias(cFile);
+                Node[,] interpolated = ImageSerializer.BilinearInterpolation(nodes, 50, 50);
+                var img = ImageSerializer.ConvertToImageGrayscale(nodes);
+                ImageSerializer.SerializeImage(img, cFile.Replace(".png", "_interpolated.png"));
                 OcrTools tools = new OcrTools(nodes);
                 OcrFeatures features = tools.CalculateFeatures();
                 var vector = scaler.ScaleFeatures(features);
@@ -37,8 +40,8 @@ namespace ImageProcess
                     var subvect = vector.Skip(i * 223).Take(223).ToList();
                     list.Add(subvect);
                 }
-                var json = JsonConvert.SerializeObject(list, Formatting.Indented);
-                File.WriteAllText(cFile.Replace(".png", ".json"), json);
+                //var json = JsonConvert.SerializeObject(list, Formatting.Indented);
+                //File.WriteAllText(cFile.Replace(".png", ".json"), json);
                 //scaler.UpdateMinMax(features);
             }
             //scaler.ExportMinMaxValues("E:\\images\\inputs\\Ocr\\MinMaxValues.json");

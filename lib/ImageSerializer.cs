@@ -34,6 +34,24 @@
             return img;
         }
 
+        public static Image<Gray, Byte> ConvertToImageGrayscale(Node[,] grid)
+        {
+            int height = grid.GetLength(0);
+            int width = grid.GetLength(1);
+
+            Image<Gray, Byte> img = new Image<Gray, Byte>(width, height);
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    Node node = grid[y, x];
+                    img.Data[y, x, 0] = (byte)node.GrayValue;
+                }
+            }
+
+            return img;
+        }
 
         public static Image<Gray, Byte> DeserializeImage(string filePath)
         {
@@ -79,6 +97,7 @@
                 {
                     bool isForeground = img.Data[y, x, 0] <= 128;
                     grid[y, x] = new Node(y, x, isForeground);
+                    grid[y, x].GrayValue = img.Data[y, x, 0];
                     if (isForeground)
                     {
                         grid[y, x].Intensity = img.Data[y, x, 0];
@@ -112,6 +131,7 @@
                     int newY = y - minY;
                     int newX = x - minX;
                     postGrid[newY, newX] = new Node(newY, newX, grid[y, x].IsForeground);
+                    postGrid[newY, newX].GrayValue = grid[y, x].GrayValue;
                 }
             }
 
@@ -132,6 +152,48 @@
             CvInvoke.Resize(blurredImage, resizedImage, newSize, interpolation: Inter.Cubic);
 
             return resizedImage;
+        }
+
+        public static Node[,] BilinearInterpolation(Node[,] original, int newWidth, int newHeight)
+        {
+            Node[,] resized = new Node[newHeight, newWidth];
+            double xRatio = (double)(original.GetLength(0) - 1) / newWidth;
+            double yRatio = (double)(original.GetLength(1) - 1) / newHeight;
+
+            for (int x = 0; x < newWidth; x++)
+            {
+                for (int y = 0; y < newHeight; y++)
+                {
+                    double gx = x * xRatio;
+                    double gy = y * yRatio;
+                    int gxi = (int)gx;
+                    int gyi = (int)gy;
+
+                    // Corners
+                    Node c00 = original[gxi, gyi];
+                    Node c10 = original[gxi + 1, gyi];
+                    Node c01 = original[gxi, gyi + 1];
+                    Node c11 = original[gxi + 1, gyi + 1];
+
+                    // Interpolation weights
+                    double cx1 = gx - gxi;
+                    double cx2 = 1 - cx1;
+                    double cy1 = gy - gyi;
+                    double cy2 = 1 - cy1;
+
+                    // Interpolate
+                    double interpolatedValue =
+                        c00.GrayValue * cx2 * cy2 +
+                        c10.GrayValue * cx1 * cy2 +
+                        c01.GrayValue * cx2 * cy1 +
+                        c11.GrayValue * cx1 * cy1;
+
+                    resized[y, x] = new Node(y, x, false);
+                    resized[y, x].GrayValue = interpolatedValue;
+                }
+            }
+
+            return resized;
         }
     }
 

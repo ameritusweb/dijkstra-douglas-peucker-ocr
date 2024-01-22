@@ -13,6 +13,7 @@ namespace ImageProcess
 
         public bool IsForeground { get; set; }
         public double Intensity { get; set; }
+        public double GrayValue { get; set; }
         public Point Point { get; set; }
         public double Distance { get; set; }
         public Node Previous { get; set; }
